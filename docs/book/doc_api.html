@@ -205,6 +205,7 @@ const thebe_selector_output = ".output, .cell_output"
 
 
 
+
 <li class="toctree-l1"><a class="reference internal" href="build.html">Build instructions</a></li>
 </ul>
 
@@ -696,6 +697,13 @@ as is done with the <a class="reference external" href="https://lyty.dev/css/css
 <span class="c1">//  of ImGuiTestEngine that was initialized by HelloImGui</span>
 <span class="c1">//  (iif ImGui Test Engine is active).</span>
 <span class="n">ImGuiTestEngine</span><span class="o">*</span><span class="w"> </span><span class="nf">GetImGuiTestEngine</span><span class="p">();</span>
+
+<span class="c1">// `GetBackendDescription()`: returns a string with the backend info</span>
+<span class="c1">// Could be for example:</span>
+<span class="c1">//     &quot;Glfw - OpenGL3&quot;</span>
+<span class="c1">//     &quot;Glfw - Metal&quot;</span>
+<span class="c1">//     &quot;Sdl - Vulkan&quot;</span>
+<span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="nf">GetBackendDescription</span><span class="p">();</span>
 </pre></div>
 </div>
 </section>

@@ -205,6 +205,7 @@ const thebe_selector_output = ".output, .cell_output"
 
 
 
+
 <li class="toctree-l1"><a class="reference internal" href="build.html">Build instructions</a></li>
 </ul>
 
@@ -404,10 +405,12 @@ document.write(`
 <li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">Application parameters</a></li>
 <li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#runnerparams">RunnerParams</a><ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#simple-runner-params">Simple runner params</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#full-params">Full params</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#full-params">Full params</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#backend-selection">Backend selection</a></li>
 </ul>
 </li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#fps-idling">Fps Idling</a></li>
+</ul>
+</li>
 <li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#runner-callbacks">Runner callbacks</a><ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#callbacks-types">Callbacks types</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#runnercallbacks">RunnerCallbacks</a></li>
@@ -425,6 +428,8 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#default-window-types">Default window types</a></li>
 </ul>
 </li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#fps-idling">Fps Idling</a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#dpi-aware-params">Dpi Aware Params</a></li>
 <li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#docking">Docking</a><ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#docking-params-example-usage">Docking Params: Example usage</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#docking-splits">Docking Splits</a></li>
@@ -453,7 +458,7 @@ document.write(`
 <h1>Application parameters<a class="headerlink" href="#application-parameters" title="Link to this heading">#</a></h1>
 <p><em>RunnerParams</em> contains all the settings and callbacks in order to run an application.
 The diagram below summarize all the possible settings and callbacks (which are explained in detail later in this document).</p>
-<p><a class="reference external" href="https://raw.githubusercontent.com/pthom/hello_imgui/master/src/hello_imgui/doc_src/hello_imgui_diagram.png"><img alt="diagram" src="https://raw.githubusercontent.com/pthom/hello_imgui/master/src/hello_imgui/doc_src/hello_imgui_diagram.png" /></a></p>
+<p><a class="reference external" href="https://raw.githubusercontent.com/pthom/hello_imgui/master/src/hello_imgui/doc_src/hello_imgui_diagram.jpg"><img alt="diagram" src="https://raw.githubusercontent.com/pthom/hello_imgui/master/src/hello_imgui/doc_src/hello_imgui_diagram.jpg" /></a></p>
 </section>
 <section class="tex2jax_ignore mathjax_ignore" id="runnerparams">
 <h1>RunnerParams<a class="headerlink" href="#runnerparams" title="Link to this heading">#</a></h1>
@@ -502,7 +507,9 @@ The diagram below summarize all the possible settings and callbacks (which are e
 <span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">fpsIdle</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">9.f</span><span class="p">;</span>
 
 <span class="w">    </span><span class="c1">// `enableIdling`: _bool, default=true_.</span>
-<span class="w">    </span><span class="c1">//  Set this to false to disable idling at startup</span>
+<span class="w">    </span><span class="c1">//  Disable idling at startup by setting this to false</span>
+<span class="w">    </span><span class="c1">//  When running, use:</span>
+<span class="w">    </span><span class="c1">//      HelloImGui::GetRunnerParams()-&gt;fpsIdling.enableIdling = false;</span>
 <span class="w">    </span><span class="kt">bool</span><span class="w">  </span><span class="n">enableIdling</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
 
 <span class="w">    </span><span class="n">RunnerParams</span><span class="w"> </span><span class="nf">ToRunnerParams</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
@@ -510,6 +517,7 @@ The diagram below summarize all the possible settings and callbacks (which are e
 </pre></div>
 </div>
 </section>
+<hr class="docutils" />
 <section id="full-params">
 <h2>Full params<a class="headerlink" href="#full-params" title="Link to this heading">#</a></h2>
 <div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="c1">// RunnerParams contains the settings and callbacks needed to run an application.</span>
@@ -555,14 +563,23 @@ The diagram below summarize all the possible settings and callbacks (which are e
 <span class="w">    </span><span class="c1">// These pointers will be filled when the application starts</span>
 <span class="w">    </span><span class="n">BackendPointers</span><span class="w"> </span><span class="n">backendPointers</span><span class="p">;</span>
 
-<span class="w">    </span><span class="c1">// `backendType`: _enum BackendType, default=BackendType::FirstAvailable_</span>
-<span class="w">    </span><span class="c1">// Select the wanted platform backend type between `Sdl`, `Glfw`.</span>
-<span class="w">    </span><span class="c1">// Only useful when multiple backend are compiled and available.</span>
-<span class="w">    </span><span class="n">BackendType</span><span class="w"> </span><span class="n">backendType</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">BackendType</span><span class="o">::</span><span class="n">FirstAvailable</span><span class="p">;</span>
-
 <span class="w">    </span><span class="c1">// `rendererBackendOptions`: _see renderer_backend_options.h_</span>
 <span class="w">    </span><span class="c1">// Options for the renderer backend</span>
 <span class="w">    </span><span class="n">RendererBackendOptions</span><span class="w"> </span><span class="n">rendererBackendOptions</span><span class="p">;</span>
+
+<span class="w">    </span><span class="c1">// `backendType`: _enum BackendType, default=PlatformBackendType::FirstAvailable_</span>
+<span class="w">    </span><span class="c1">// Select the wanted platform backend type between `Sdl`, `Glfw`.</span>
+<span class="w">    </span><span class="c1">// if `FirstAvailable`, Glfw will be preferred over Sdl when both are available.</span>
+<span class="w">    </span><span class="c1">// Only useful when multiple backend are compiled and available.</span>
+<span class="w">    </span><span class="c1">// (for compatibility with older versions, you can use BackendType instead of PlatformBackendType)</span>
+<span class="w">    </span><span class="n">PlatformBackendType</span><span class="w"> </span><span class="n">platformBackendType</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PlatformBackendType</span><span class="o">::</span><span class="n">FirstAvailable</span><span class="p">;</span>
+
+<span class="w">    </span><span class="c1">// `renderingBackendType`: _enum RenderingBackendType, default=RenderingBackendType::FirstAvailable_</span>
+<span class="w">    </span><span class="c1">// Select the wanted rendering backend type between `OpenGL3`, `Metal`, `Vulkan`, `DirectX11`, `DirectX12`.</span>
+<span class="w">    </span><span class="c1">// if `FirstAvailable`, it will be selected in the order of preference mentioned above.</span>
+<span class="w">    </span><span class="c1">// Only useful when multiple rendering backend are compiled and available.</span>
+<span class="w">    </span><span class="n">RendererBackendType</span><span class="w"> </span><span class="n">rendererBackendType</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">RendererBackendType</span><span class="o">::</span><span class="n">FirstAvailable</span><span class="p">;</span>
+
 
 
 <span class="w">    </span><span class="c1">// --------------- Settings -------------------</span>
@@ -604,6 +621,10 @@ The diagram below summarize all the possible settings and callbacks (which are e
 <span class="w">    </span><span class="c1">// (set fpsIdling.enableIdling to false to disable Idling)</span>
 <span class="w">    </span><span class="n">FpsIdling</span><span class="w"> </span><span class="n">fpsIdling</span><span class="p">;</span>
 
+<span class="w">    </span><span class="c1">// --------------- DPI Handling -----------</span>
+<span class="w">    </span><span class="c1">// Hello ImGui will try its best to automatically handle DPI scaling for you.</span>
+<span class="w">    </span><span class="c1">// If it fails, look at DpiAwareParams (and the corresponding Ini file settings)</span>
+<span class="w">    </span><span class="n">DpiAwareParams</span><span class="w"> </span><span class="n">dpiAwareParams</span><span class="p">;</span>
 
 <span class="w">    </span><span class="c1">// --------------- Misc -------------------</span>
 
@@ -623,46 +644,48 @@ The diagram below summarize all the possible settings and callbacks (which are e
 <span class="w">    </span><span class="c1">// Set the application refresh rate</span>
 <span class="w">    </span><span class="c1">// (only used on emscripten: 0 stands for &quot;let the app or the browser decide&quot;)</span>
 <span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">emscripten_fps</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+
+<span class="w">    </span><span class="c1">// --------------- Legacy -------------------`</span>
+<span class="cp">#ifndef HELLOIMGUI_DISABLE_OBSOLETE_BACKEND</span>
+<span class="w">    </span><span class="n">PlatformBackendType</span><span class="o">&amp;</span><span class="w"> </span><span class="n">backendType</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">platformBackendType</span><span class="p">;</span><span class="w"> </span><span class="c1">// a synonym, for backward compatibility</span>
+<span class="cp">#endif</span>
 <span class="p">};</span>
 </pre></div>
 </div>
-</section>
-</section>
-<section class="tex2jax_ignore mathjax_ignore" id="fps-idling">
-<h1>Fps Idling<a class="headerlink" href="#fps-idling" title="Link to this heading">#</a></h1>
-<p>See <a class="reference external" href="https://github.com/pthom/hello_imgui/blob/master/src/hello_imgui/runner_params.h">runner_params.h</a>.</p>
-<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="c1">// FpsIdling is a struct that contains Fps Idling parameters</span>
-<span class="k">struct</span><span class="w"> </span><span class="nc">FpsIdling</span>
+<section id="backend-selection">
+<h3>Backend selection<a class="headerlink" href="#backend-selection" title="Link to this heading">#</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="c1">// You can select the platform backend type (SDL, GLFW) and the rendering backend type</span>
+<span class="c1">// via RunnerParams.backendType and RunnerParams.renderingBackendType.</span>
+
+<span class="c1">// Platform backend type (SDL, GLFW)</span>
+<span class="c1">// They are listed in the order of preference when FirstAvailable is selected.</span>
+<span class="k">enum</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">PlatformBackendType</span>
 <span class="p">{</span>
-<span class="w">    </span><span class="c1">// `fpsIdle`: _float, default=9_.</span>
-<span class="w">    </span><span class="c1">//  ImGui applications can consume a lot of CPU, since they update the screen</span>
-<span class="w">    </span><span class="c1">//  very frequently. In order to reduce the CPU usage, the FPS is reduced when</span>
-<span class="w">    </span><span class="c1">//  no user interaction is detected.</span>
-<span class="w">    </span><span class="c1">//  This is ok most of the time but if you are displaying animated widgets</span>
-<span class="w">    </span><span class="c1">//  (for example a live video), you may want to ask for a faster refresh:</span>
-<span class="w">    </span><span class="c1">//  either increase fpsIdle, or set it to 0 for maximum refresh speed</span>
-<span class="w">    </span><span class="c1">//  (you can change this value during the execution depending on your application</span>
-<span class="w">    </span><span class="c1">//  refresh needs)</span>
-<span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">fpsIdle</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">9.f</span><span class="p">;</span>
+<span class="w">    </span><span class="n">FirstAvailable</span><span class="p">,</span>
+<span class="w">    </span><span class="n">Glfw</span><span class="p">,</span>
+<span class="w">    </span><span class="n">Sdl</span><span class="p">,</span>
+<span class="p">};</span>
 
-<span class="w">    </span><span class="c1">// `enableIdling`: _bool, default=true_.</span>
-<span class="w">    </span><span class="c1">//  Set this to false to disable idling </span>
-<span class="w">    </span><span class="c1">//  (this can be changed dynamically during execution)</span>
-<span class="w">    </span><span class="kt">bool</span><span class="w">  </span><span class="n">enableIdling</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="cp">#ifndef HELLOIMGUI_DISABLE_OBSOLETE_BACKEND</span>
+<span class="k">using</span><span class="w"> </span><span class="n">BackendType</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PlatformBackendType</span><span class="p">;</span><span class="w"> </span><span class="c1">// for backward compatibility</span>
+<span class="cp">#endif</span>
 
-<span class="w">    </span><span class="c1">// `isIdling`: bool (dynamically updated during execution)</span>
-<span class="w">    </span><span class="c1">//  This bool will be updated during the application execution,</span>
-<span class="w">    </span><span class="c1">//  and will be set to true when it is idling.</span>
-<span class="w">    </span><span class="kt">bool</span><span class="w">  </span><span class="n">isIdling</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
-
-<span class="w">    </span><span class="c1">// `rememberEnableIdling`: _bool, default=true_.</span>
-<span class="w">    </span><span class="c1">//  If true, the last value of enableIdling is restored from the settings at startup.</span>
-<span class="w">    </span><span class="kt">bool</span><span class="w">  </span><span class="n">rememberEnableIdling</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
+<span class="c1">// Rendering backend type (OpenGL3, Metal, Vulkan, DirectX11, DirectX12)</span>
+<span class="c1">// They are listed in the order of preference when FirstAvailable is selected.</span>
+<span class="k">enum</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">RendererBackendType</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="n">FirstAvailable</span><span class="p">,</span>
+<span class="w">    </span><span class="n">OpenGL3</span><span class="p">,</span>
+<span class="w">    </span><span class="n">Metal</span><span class="p">,</span>
+<span class="w">    </span><span class="n">Vulkan</span><span class="p">,</span>
+<span class="w">    </span><span class="n">DirectX11</span><span class="p">,</span>
+<span class="w">    </span><span class="n">DirectX12</span><span class="p">,</span>
 <span class="p">};</span>
 </pre></div>
 </div>
 </section>
-<hr class="docutils" />
+</section>
+</section>
 <section class="tex2jax_ignore mathjax_ignore" id="runner-callbacks">
 <h1>Runner callbacks<a class="headerlink" href="#runner-callbacks" title="Link to this heading">#</a></h1>
 <p>See <a class="reference external" href="https://github.com/pthom/hello_imgui/blob/master/src/hello_imgui/runner_callbacks.h">runner_callbacks.h</a>.</p>
@@ -927,7 +950,7 @@ The diagram below summarize all the possible settings and callbacks (which are e
 <h2>AppWindowParams<a class="headerlink" href="#appwindowparams" title="Link to this heading">#</a></h2>
 <div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="c1">//</span>
 <span class="c1">// AppWindowParams is a struct that defines the application window display params.</span>
-<span class="c1">//See https://raw.githubusercontent.com/pthom/hello_imgui/master/src/hello_imgui/doc_src/hello_imgui_diagram.png</span>
+<span class="c1">//See https://raw.githubusercontent.com/pthom/hello_imgui/master/src/hello_imgui/doc_src/hello_imgui_diagram.jpg</span>
 <span class="c1">// for details.</span>
 <span class="k">struct</span><span class="w"> </span><span class="nc">AppWindowParams</span>
 <span class="p">{</span>
@@ -1206,6 +1229,109 @@ The diagram below summarize all the possible settings and callbacks (which are e
 </pre></div>
 </div>
 </section>
+</section>
+<section class="tex2jax_ignore mathjax_ignore" id="fps-idling">
+<h1>Fps Idling<a class="headerlink" href="#fps-idling" title="Link to this heading">#</a></h1>
+<p>See <a class="reference external" href="https://github.com/pthom/hello_imgui/blob/master/src/hello_imgui/runner_params.h">runner_params.h</a>.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="c1">// FpsIdling is a struct that contains Fps Idling parameters</span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">FpsIdling</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="c1">// `fpsIdle`: _float, default=9_.</span>
+<span class="w">    </span><span class="c1">//  ImGui applications can consume a lot of CPU, since they update the screen</span>
+<span class="w">    </span><span class="c1">//  very frequently. In order to reduce the CPU usage, the FPS is reduced when</span>
+<span class="w">    </span><span class="c1">//  no user interaction is detected.</span>
+<span class="w">    </span><span class="c1">//  This is ok most of the time but if you are displaying animated widgets</span>
+<span class="w">    </span><span class="c1">//  (for example a live video), you may want to ask for a faster refresh:</span>
+<span class="w">    </span><span class="c1">//  either increase fpsIdle, or set it to 0 for maximum refresh speed</span>
+<span class="w">    </span><span class="c1">//  (you can change this value during the execution depending on your application</span>
+<span class="w">    </span><span class="c1">//  refresh needs)</span>
+<span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">fpsIdle</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">9.f</span><span class="p">;</span>
+
+<span class="w">    </span><span class="c1">// `enableIdling`: _bool, default=true_.</span>
+<span class="w">    </span><span class="c1">//  Disable idling by setting this to false.</span>
+<span class="w">    </span><span class="c1">//  (this can be changed dynamically during execution)</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w">  </span><span class="n">enableIdling</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+
+<span class="w">    </span><span class="c1">// `isIdling`: bool (dynamically updated during execution)</span>
+<span class="w">    </span><span class="c1">//  This bool will be updated during the application execution,</span>
+<span class="w">    </span><span class="c1">//  and will be set to true when it is idling.</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w">  </span><span class="n">isIdling</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
+
+<span class="w">    </span><span class="c1">// `rememberEnableIdling`: _bool, default=true_.</span>
+<span class="w">    </span><span class="c1">//  If true, the last value of enableIdling is restored from the settings at startup.</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w">  </span><span class="n">rememberEnableIdling</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</section>
+<section class="tex2jax_ignore mathjax_ignore" id="dpi-aware-params">
+<h1>Dpi Aware Params<a class="headerlink" href="#dpi-aware-params" title="Link to this heading">#</a></h1>
+<p>See <a class="reference internal" href="#ttps://github.com/pthom/hello_imgui/blob/master/src/hello_imgui/dpi_aware.h"><span class="xref myst">dpi_aware.h</span></a></p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="c1">//</span>
+<span class="c1">// Hello ImGui will try its best to automatically handle DPI scaling for you.</span>
+<span class="c1">// It does this by setting two values:</span>
+<span class="c1">//</span>
+<span class="c1">// - `dpiWindowSizeFactor`:</span>
+<span class="c1">//        factor by which window size should be multiplied</span>
+<span class="c1">//</span>
+<span class="c1">// - `fontRenderingScale`:</span>
+<span class="c1">//     factor by which fonts glyphs should be scaled at rendering time</span>
+<span class="c1">//     (typically 1 on windows, and 0.5 on macOS retina screens)</span>
+<span class="c1">//</span>
+<span class="c1">//    By default, Hello ImGui will compute them automatically,</span>
+<span class="c1">//    when dpiWindowSizeFactor and fontRenderingScale are set to 0.</span>
+<span class="c1">//</span>
+<span class="c1">// How to set those values manually:</span>
+<span class="c1">// ---------------------------------</span>
+<span class="c1">// If it fails (i.e. your window and/or fonts are too big or too small),</span>
+<span class="c1">// you may set them manually:</span>
+<span class="c1">//    (1) Either by setting them programmatically in your application</span>
+<span class="c1">//        (set their values in `runnerParams.dpiAwareParams`)</span>
+<span class="c1">//    (2) Either by setting them in a `hello_imgui.ini` file in the current folder, or any of its parent folders.</span>
+<span class="c1">//       (this is useful when you want to set them for a specific app or set of apps, without modifying the app code)</span>
+<span class="c1">// Note: if several methods are used, the order of priority is (1) &gt; (2)</span>
+<span class="c1">//</span>
+<span class="c1">// Example content of a ini file:</span>
+<span class="c1">// ------------------------------</span>
+<span class="c1">//     [DpiAwareParams]</span>
+<span class="c1">//     dpiWindowSizeFactor=2</span>
+<span class="c1">//     fontRenderingScale=0.5</span>
+<span class="c1">//</span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">DpiAwareParams</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="c1">// `dpiWindowSizeFactor`</span>
+<span class="w">    </span><span class="c1">//        factor by which window size should be multiplied to get a similar</span>
+<span class="w">    </span><span class="c1">//        visible size on different OSes.</span>
+<span class="w">    </span><span class="c1">//  In a standard environment (i.e. outside of Hello ImGui), an application with a size of 960x480 pixels,</span>
+<span class="w">    </span><span class="c1">//  may have a physical size (in mm or inches) that varies depending on the screen DPI, and the OS.</span>
+<span class="w">    </span><span class="c1">//</span>
+<span class="w">    </span><span class="c1">//  Inside Hello ImGui, the window size is always treated as targeting a 96 PPI screen, so that its size will</span>
+<span class="w">    </span><span class="c1">//  look similar whatever the OS and the screen DPI.</span>
+<span class="w">    </span><span class="c1">//  In our example, our 960x480 pixels window will try to correspond to a 10x5 inches window</span>
+<span class="w">    </span><span class="c1">//</span>
+<span class="w">    </span><span class="c1">//  Hello ImGui does its best to compute it on all OSes.</span>
+<span class="w">    </span><span class="c1">//  However, if it fails you may set its value manually.</span>
+<span class="w">    </span><span class="c1">//  If it is set to 0, Hello ImGui will compute it automatically,</span>
+<span class="w">    </span><span class="c1">//  and the resulting value will be stored in `dpiWindowSizeFactor`.</span>
+<span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">dpiWindowSizeFactor</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0f</span><span class="p">;</span>
+
+<span class="w">    </span><span class="c1">// `fontRenderingScale`</span>
+<span class="w">    </span><span class="c1">//     factor (that is either 1 or &lt; 1.) by which fonts glyphs should be</span>
+<span class="w">    </span><span class="c1">//     scaled at rendering time.</span>
+<span class="w">    </span><span class="c1">//     On macOS retina screens, it will be 0.5, since macOS APIs hide</span>
+<span class="w">    </span><span class="c1">//     the real resolution of the screen.</span>
+<span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">fontRenderingScale</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0f</span><span class="p">;</span>
+
+<span class="w">    </span><span class="c1">// `dpiFontLoadingFactor`</span>
+<span class="w">    </span><span class="c1">//      factor by which font size should be multiplied at loading time to get a similar</span>
+<span class="w">    </span><span class="c1">//      visible size on different OSes.</span>
+<span class="w">    </span><span class="c1">//      The size will be equivalent to a size given for a 96 PPI screen</span>
+<span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="nf">DpiFontLoadingFactor</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">dpiWindowSizeFactor</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">fontRenderingScale</span><span class="p">;};</span>
+<span class="p">};</span>
+
+<span class="c1">// ----------------------------------------------------------------------------</span>
+</pre></div>
+</div>
 </section>
 <hr class="docutils" />
 <section class="tex2jax_ignore mathjax_ignore" id="docking">
@@ -1681,10 +1807,12 @@ specifies the list of dockable windows, along with their default location, and t
 <li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">Application parameters</a></li>
 <li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#runnerparams">RunnerParams</a><ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#simple-runner-params">Simple runner params</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#full-params">Full params</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#full-params">Full params</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#backend-selection">Backend selection</a></li>
 </ul>
 </li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#fps-idling">Fps Idling</a></li>
+</ul>
+</li>
 <li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#runner-callbacks">Runner callbacks</a><ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#callbacks-types">Callbacks types</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#runnercallbacks">RunnerCallbacks</a></li>
@@ -1702,6 +1830,8 @@ specifies the list of dockable windows, along with their default location, and t
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#default-window-types">Default window types</a></li>
 </ul>
 </li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#fps-idling">Fps Idling</a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#dpi-aware-params">Dpi Aware Params</a></li>
 <li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#docking">Docking</a><ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#docking-params-example-usage">Docking Params: Example usage</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#docking-splits">Docking Splits</a></li>

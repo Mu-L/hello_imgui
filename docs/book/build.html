@@ -204,6 +204,7 @@ const thebe_selector_output = ".output, .cell_output"
 
 
 
+
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">Build instructions</a></li>
 </ul>
 
@@ -452,46 +453,45 @@ make<span class="w"> </span>-j
 <section id="available-backends">
 <h2>Available backends<a class="headerlink" href="#available-backends" title="Link to this heading">#</a></h2>
 <p>See documentation below (extract from <a class="reference external" href="https://github.com/pthom/hello_imgui/blob/master/CMakeLists.txt">CMakeLists.txt</a>):</p>
-<div class="highlight-cmake notranslate"><div class="highlight"><pre><span></span><span class="c"># Available backends combinations: HelloImGui needs to use at least one of them.</span>
-<span class="c"># If you specify no option:</span>
-<span class="c"># - HELLOIMGUI_USE_GLFW_OPENGL3 will be used for Windows, Linux, and macOS</span>
-<span class="c"># - HELLOIMGUI_USE_SDL_OPENGL3 will be used for Android, iOS and emscripten</span>
+<div class="highlight-cmake notranslate"><div class="highlight"><pre><span></span><span class="c">#</span>
+<span class="c"># You need to select at least two backends:</span>
 <span class="c">#</span>
-<span class="c"># Note:</span>
-<span class="c"># - Only one rendering backend can be used at a time (OpenGL3, Metal or Vulkan)!</span>
-<span class="c"># - You may select multiple platform backends</span>
-<span class="c">#   (for example, you may select both SDL and Glfw3)</span>
-<span class="c"># - Combinations using OpenGL3 as a renderer are easier to use,</span>
-<span class="c">#   and are recommended, especially for beginners.</span>
-<span class="c">################################################################################</span>
-<span class="c"># Standard backends:</span>
-<span class="c"># Use Glfw3 + OpenGl3</span>
-<span class="nb">option</span><span class="p">(</span><span class="s">HELLOIMGUI_USE_GLFW_OPENGL3</span><span class="w"> </span><span class="s2">&quot;Build HelloImGui for Glfw3+OpenGL3&quot;</span><span class="w"> </span><span class="s">OFF</span><span class="p">)</span>
-<span class="c"># Use SDL2 + OpenGL3</span>
-<span class="nb">option</span><span class="p">(</span><span class="s">HELLOIMGUI_USE_SDL_OPENGL3</span><span class="w"> </span><span class="s2">&quot;Build HelloImGui for SDL2+OpenGL3&quot;</span><span class="w"> </span><span class="s">OFF</span><span class="p">)</span>
-
-<span class="c"># Advanced backends, for experienced users:</span>
-<span class="c">#   Vulkan, Metal, and DirectX11 do work, but you may need to customize the rendering code inside HelloImGui:</span>
+<span class="c">#     - At least one (or more) rendering backend (OpenGL3, Metal, Vulkan, DirectX11, DirectX12)</span>
+<span class="c">#       Make your choice according to your needs and your target platforms, between:</span>
+<span class="c">#          -DHELLOIMGUI_HAS_OPENGL3=ON    # This is the recommended choice, especially for beginners</span>
+<span class="c">#          -DHELLOIMGUI_HAS_METAL=ON      # Apple only, advanced users only</span>
+<span class="c">#          -DHELLOIMGUI_HAS_VULKAN=ON     # Advanced users only</span>
+<span class="c">#          -DHELLOIMGUI_HAS_DIRECTX11=ON  # Windows only, still experimental</span>
+<span class="c">#          -DHELLOIMGUI_HAS_DIRECTX12=ON  # Windows only, advanced users only, still experimental</span>
+<span class="c">#</span>
+<span class="c">#     - At least one (or more) platform backend (SDL2, Glfw3):</span>
+<span class="c">#      Make your choice according to your needs and your target platforms, between:</span>
+<span class="c">#          -DHELLOIMGUI_USE_SDL2=ON</span>
+<span class="c">#          -DHELLOIMGUI_USE_GLFW3=ON</span>
+<span class="c">#</span>
+<span class="c"># If you make no choice, the default will be selected:</span>
+<span class="c">#     HELLOIMGUI_USE_GLFW3 + HELLOIMGUI_HAS_OPENGL3</span>
+<span class="c">#</span>
+<span class="c"># Note about rendering backends:</span>
+<span class="c">#   OpenGL3 is the recommended choice as a starting point, especially for beginners.</span>
+<span class="c">#   Vulkan, Metal, and DirectX11, DirectX12 do work, but you may need to customize the rendering code inside HelloImGui:</span>
 <span class="c">#   see src/hello_imgui/internal/backend_impls/rendering_xxxx.[h,cpp]</span>
 <span class="c">#   (using those backends probably implies that you want to heavily customize the rendering code)</span>
-<span class="c"># Use Glfw3 + Metal (Apple only)</span>
-<span class="nb">option</span><span class="p">(</span><span class="s">HELLOIMGUI_USE_GLFW_METAL</span><span class="w"> </span><span class="s2">&quot;Build HelloImGui for Glfw3+Metal&quot;</span><span class="w"> </span><span class="s">OFF</span><span class="p">)</span>
-<span class="c"># Use SDL2 + Metal (Apple only)</span>
-<span class="nb">option</span><span class="p">(</span><span class="s">HELLOIMGUI_USE_SDL_METAL</span><span class="w"> </span><span class="s2">&quot;Build HelloImGui for SDL2+Metal&quot;</span><span class="w"> </span><span class="s">OFF</span><span class="p">)</span>
-<span class="c"># Use Glfw3 + Vulkan</span>
-<span class="nb">option</span><span class="p">(</span><span class="s">HELLOIMGUI_USE_GLFW_VULKAN</span><span class="w"> </span><span class="s2">&quot;Build HelloImGui for Glfw3+Vulkan&quot;</span><span class="w"> </span><span class="s">OFF</span><span class="p">)</span>
-<span class="c"># Use SDL2 + Vulkan</span>
-<span class="nb">option</span><span class="p">(</span><span class="s">HELLOIMGUI_USE_SDL_VULKAN</span><span class="w"> </span><span class="s2">&quot;Build HelloImGui for SDL2+Vulkan&quot;</span><span class="w"> </span><span class="s">OFF</span><span class="p">)</span>
-<span class="c"># Use SDL2 + DirectX 11 (Note: there is a known issue with DirectX11, see src/hello_imgui/internal/backend_impls/rendering_dx11.h)</span>
-<span class="nb">option</span><span class="p">(</span><span class="s">HELLOIMGUI_USE_SDL_DIRECTX11</span><span class="w"> </span><span class="s2">&quot;Build HelloImGui for SDL2+DirectX11&quot;</span><span class="w"> </span><span class="s">OFF</span><span class="p">)</span>
-<span class="c"># Use Glfw3 + DirectX 11 (Note: there is a known issue with DirectX11, see src/hello_imgui/internal/backend_impls/rendering_dx11.h)</span>
-<span class="nb">option</span><span class="p">(</span><span class="s">HELLOIMGUI_USE_GLFW_DIRECTX11</span><span class="w"> </span><span class="s2">&quot;Build HelloImGui for Glfw3+DirectX11&quot;</span><span class="w"> </span><span class="s">OFF</span><span class="p">)</span>
-<span class="c"># Experimental! DirectX12 was not tested, although it does compile!</span>
-<span class="nb">option</span><span class="p">(</span><span class="s">HELLOIMGUI_USE_SDL_DIRECTX12</span><span class="w"> </span><span class="s2">&quot;Build HelloImGui for SDL2+DirectX12&quot;</span><span class="w"> </span><span class="s">OFF</span><span class="p">)</span>
+<span class="c">#</span>
+<span class="c">################################################################################</span>
+<span class="c"># Platform backends:</span>
+<span class="nb">option</span><span class="p">(</span><span class="s">HELLOIMGUI_USE_GLFW3</span><span class="w"> </span><span class="s2">&quot;Use Glfw3 as a platform backend&quot;</span><span class="w"> </span><span class="s">OFF</span><span class="p">)</span>
+<span class="nb">option</span><span class="p">(</span><span class="s">HELLOIMGUI_USE_SDL2</span><span class="w"> </span><span class="s2">&quot;Use Sdl2 as a platform backend&quot;</span><span class="w"> </span><span class="s">OFF</span><span class="p">)</span>
+<span class="c"># Rendering backends</span>
+<span class="nb">option</span><span class="p">(</span><span class="s">HELLOIMGUI_HAS_OPENGL3</span><span class="w"> </span><span class="s2">&quot;Use OpenGL3 as a rendering backend&quot;</span><span class="w"> </span><span class="s">OFF</span><span class="p">)</span>
+<span class="nb">option</span><span class="p">(</span><span class="s">HELLOIMGUI_HAS_METAL</span><span class="w"> </span><span class="s2">&quot;Use Metal as a rendering backend&quot;</span><span class="w"> </span><span class="s">OFF</span><span class="p">)</span>
+<span class="nb">option</span><span class="p">(</span><span class="s">HELLOIMGUI_HAS_VULKAN</span><span class="w"> </span><span class="s2">&quot;Use Vulkan as a rendering backend&quot;</span><span class="w"> </span><span class="s">OFF</span><span class="p">)</span>
+<span class="nb">option</span><span class="p">(</span><span class="s">HELLOIMGUI_HAS_DIRECTX11</span><span class="w"> </span><span class="s2">&quot;Use DirectX11 as a rendering backend&quot;</span><span class="w"> </span><span class="s">OFF</span><span class="p">)</span>
+<span class="nb">option</span><span class="p">(</span><span class="s">HELLOIMGUI_HAS_DIRECTX12</span><span class="w"> </span><span class="s2">&quot;Use DirectX12 as a rendering backend&quot;</span><span class="w"> </span><span class="s">OFF</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>In order to select your own backend, use one of the afore mentioned backend combinations, for example:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>cmake<span class="w"> </span>..<span class="w"> </span>-HELLOIMGUI_USE_SDL_OPENGL3<span class="o">=</span>ON
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>cmake<span class="w"> </span>..<span class="w"> </span>-DHELLOIMGUI_USE_SDL2<span class="o">=</span>ON<span class="w"> </span>-DHELLOIMGUI_HAS_OPENGL3<span class="o">=</span>ON
 </pre></div>
 </div>
 </section>
