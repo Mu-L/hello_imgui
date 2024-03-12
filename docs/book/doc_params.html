@@ -567,11 +567,10 @@ The diagram below summarize all the possible settings and callbacks (which are e
 <span class="w">    </span><span class="c1">// Options for the renderer backend</span>
 <span class="w">    </span><span class="n">RendererBackendOptions</span><span class="w"> </span><span class="n">rendererBackendOptions</span><span class="p">;</span>
 
-<span class="w">    </span><span class="c1">// `backendType`: _enum BackendType, default=PlatformBackendType::FirstAvailable_</span>
+<span class="w">    </span><span class="c1">// `platformBackendType`: _enum PlatformBackendType, default=PlatformBackendType::FirstAvailable_</span>
 <span class="w">    </span><span class="c1">// Select the wanted platform backend type between `Sdl`, `Glfw`.</span>
 <span class="w">    </span><span class="c1">// if `FirstAvailable`, Glfw will be preferred over Sdl when both are available.</span>
 <span class="w">    </span><span class="c1">// Only useful when multiple backend are compiled and available.</span>
-<span class="w">    </span><span class="c1">// (for compatibility with older versions, you can use BackendType instead of PlatformBackendType)</span>
 <span class="w">    </span><span class="n">PlatformBackendType</span><span class="w"> </span><span class="n">platformBackendType</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PlatformBackendType</span><span class="o">::</span><span class="n">FirstAvailable</span><span class="p">;</span>
 
 <span class="w">    </span><span class="c1">// `renderingBackendType`: _enum RenderingBackendType, default=RenderingBackendType::FirstAvailable_</span>
@@ -644,18 +643,13 @@ The diagram below summarize all the possible settings and callbacks (which are e
 <span class="w">    </span><span class="c1">// Set the application refresh rate</span>
 <span class="w">    </span><span class="c1">// (only used on emscripten: 0 stands for &quot;let the app or the browser decide&quot;)</span>
 <span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">emscripten_fps</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
-
-<span class="w">    </span><span class="c1">// --------------- Legacy -------------------`</span>
-<span class="cp">#ifndef HELLOIMGUI_DISABLE_OBSOLETE_BACKEND</span>
-<span class="w">    </span><span class="n">PlatformBackendType</span><span class="o">&amp;</span><span class="w"> </span><span class="n">backendType</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">platformBackendType</span><span class="p">;</span><span class="w"> </span><span class="c1">// a synonym, for backward compatibility</span>
-<span class="cp">#endif</span>
 <span class="p">};</span>
 </pre></div>
 </div>
 <section id="backend-selection">
 <h3>Backend selection<a class="headerlink" href="#backend-selection" title="Link to this heading">#</a></h3>
 <div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="c1">// You can select the platform backend type (SDL, GLFW) and the rendering backend type</span>
-<span class="c1">// via RunnerParams.backendType and RunnerParams.renderingBackendType.</span>
+<span class="c1">// via RunnerParams.platformBackendType and RunnerParams.renderingBackendType.</span>
 
 <span class="c1">// Platform backend type (SDL, GLFW)</span>
 <span class="c1">// They are listed in the order of preference when FirstAvailable is selected.</span>
@@ -665,10 +659,6 @@ The diagram below summarize all the possible settings and callbacks (which are e
 <span class="w">    </span><span class="n">Glfw</span><span class="p">,</span>
 <span class="w">    </span><span class="n">Sdl</span><span class="p">,</span>
 <span class="p">};</span>
-
-<span class="cp">#ifndef HELLOIMGUI_DISABLE_OBSOLETE_BACKEND</span>
-<span class="k">using</span><span class="w"> </span><span class="n">BackendType</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PlatformBackendType</span><span class="p">;</span><span class="w"> </span><span class="c1">// for backward compatibility</span>
-<span class="cp">#endif</span>
 
 <span class="c1">// Rendering backend type (OpenGL3, Metal, Vulkan, DirectX11, DirectX12)</span>
 <span class="c1">// They are listed in the order of preference when FirstAvailable is selected.</span>
@@ -774,6 +764,9 @@ The diagram below summarize all the possible settings and callbacks (which are e
 <span class="w">    </span><span class="c1">//  (LoadDefaultFont_WithFontAwesome will load fonts from assets/fonts/</span>
 <span class="w">    </span><span class="c1">//  but reverts to the ImGui embedded font if not found)</span>
 <span class="w">    </span><span class="n">VoidFunction</span><span class="w"> </span><span class="n">LoadAdditionalFonts</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">VoidFunction</span><span class="p">)</span><span class="n">ImGuiDefaultSettings</span><span class="o">::</span><span class="n">LoadDefaultFont_WithFontAwesomeIcons</span><span class="p">;</span>
+<span class="w">    </span><span class="c1">// If LoadAdditionalFonts==LoadDefaultFont_WithFontAwesomeIcons, this parameter control</span>
+<span class="w">    </span><span class="c1">// which icon font will be loaded by default.</span>
+<span class="w">    </span><span class="n">DefaultIconFont</span><span class="w"> </span><span class="n">defaultIconFont</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">DefaultIconFont</span><span class="o">::</span><span class="n">FontAwesome4</span><span class="p">;</span>
 
 <span class="w">    </span><span class="c1">// `SetupImGuiConfig`: default=_ImGuiDefaultSettings::SetupDefaultImGuiConfig*.</span>
 <span class="w">    </span><span class="c1">//  If needed, change ImGui config via SetupImGuiConfig</span>
@@ -1266,7 +1259,7 @@ The diagram below summarize all the possible settings and callbacks (which are e
 </section>
 <section class="tex2jax_ignore mathjax_ignore" id="dpi-aware-params">
 <h1>Dpi Aware Params<a class="headerlink" href="#dpi-aware-params" title="Link to this heading">#</a></h1>
-<p>See <a class="reference internal" href="#ttps://github.com/pthom/hello_imgui/blob/master/src/hello_imgui/dpi_aware.h"><span class="xref myst">dpi_aware.h</span></a></p>
+<p>See <a class="reference external" href="https://github.com/pthom/hello_imgui/blob/master/src/hello_imgui/dpi_aware.h">dpi_aware.h</a></p>
 <div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="c1">//</span>
 <span class="c1">// Hello ImGui will try its best to automatically handle DPI scaling for you.</span>
 <span class="c1">// It does this by setting two values:</span>
