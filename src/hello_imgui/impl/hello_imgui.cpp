@@ -7,13 +7,11 @@
 #include <set>
 #include <chrono>
 #include <cstdio>
+#include <optional>
 
 
 namespace HelloImGui
 {
-RunnerParams* gLastRunnerParams = nullptr;
-std::unique_ptr<AbstractRunner> gLastRunner;
-
 std::string gMissingBackendErrorMessage = R"(
 
 When running CMake, you should specify
@@ -33,7 +31,7 @@ When running CMake, you should specify
 )";
 
 
-bool _CheckAdditionLayoutNamesUniqueness(RunnerParams &runnerParams)
+bool _CheckAdditionLayoutNamesUniqueness(const RunnerParams &runnerParams)
 {
     std::set<std::string> names_set;
     names_set.insert(runnerParams.dockingParams.layoutName);
@@ -49,18 +47,112 @@ bool _CheckAdditionLayoutNamesUniqueness(RunnerParams &runnerParams)
     return areNamesUnique;
 }
 
-void Run(RunnerParams& runnerParams)
+
+// =========================== HelloImGui::Renderer ==================================
+
+//
+// Static instances to store the last runner and its parameters
+// -------------------------------------------------------------
+// gLastRunnerParamsOpt may contain a valid value if Renderer(const RunnerParams& ) was used
+std::optional<RunnerParams> gLastRunnerParamsOpt;
+// gLastRunnerParamsUserPointer may contain a valid value if Run(RunnerParams& ) was used
+// (we may modify the user's runnerParams in this case)
+static RunnerParams* gLastRunnerParamsUserPointer = nullptr;
+// a pointer to the current AbstractRunner
+static std::unique_ptr<AbstractRunner> gLastRunner;
+
+static RunnerParams* Priv_CurrentRunnerParamsPtr()
 {
+    if (gLastRunnerParamsOpt.has_value())
+        return &gLastRunnerParamsOpt.value();
+    if (gLastRunnerParamsUserPointer != nullptr)
+        return gLastRunnerParamsUserPointer;
+    return nullptr;
+}
+
+
+// Only one instance of `Renderer` can exist at a time
+// ---------------------------------------------------
+static int gRendererInstanceCount = 0;
+
+static void Priv_SetupRunner(RunnerParams &passedUserParams, bool isUserPointer)
+{
+    if (gRendererInstanceCount > 0)
+        throw std::runtime_error("Only one instance of `HelloImGui::Renderer` can exist at a time.");
+    if (!isUserPointer)
+        gLastRunnerParamsOpt = passedUserParams; // Store a copy of the user's runnerParams
+    else
+        gLastRunnerParamsUserPointer = &passedUserParams; // Store a pointer to the user's runnerParams
+
+    IM_ASSERT(Priv_CurrentRunnerParamsPtr() != nullptr);
+    RunnerParams &runnerParams = *Priv_CurrentRunnerParamsPtr();
     IM_ASSERT(_CheckAdditionLayoutNamesUniqueness(runnerParams));
+
     gLastRunner = FactorRunner(runnerParams);
     if (gLastRunner == nullptr)
     {
-        fprintf(stderr, "HelloImGui::Run() failed to factor a runner!\n %s", gMissingBackendErrorMessage.c_str());
-        IM_ASSERT(false && "HelloImGui::Run() failed to factor a runner!");
+        fprintf(stderr, "HelloImGui::Renderer() failed to factor a runner!\n %s", gMissingBackendErrorMessage.c_str());
+        IM_ASSERT(false && "HelloImGui::Renderer() failed to factor a runner!");
     }
-    gLastRunnerParams = &runnerParams;
+    gLastRunner->Setup();
+    gRendererInstanceCount++;
+}
+
+static void Priv_TearDown()
+{
+    IM_ASSERT(gLastRunner != nullptr && "HelloImGui::Renderer::~Renderer() called without a valid runner");
+    if (!gLastRunner->WasTearedDown())
+        gLastRunner->TearDown(false);
+    gLastRunner = nullptr;
+    gRendererInstanceCount = 0;
+    gLastRunnerParamsOpt.reset();
+    gLastRunnerParamsUserPointer = nullptr;
+}
+
+Renderer::Renderer(const HelloImGui::RunnerParams &runnerParams)
+{
+    HelloImGui::RunnerParams runnerParamsCopy = runnerParams;
+    Priv_SetupRunner(runnerParamsCopy, false);
+}
+
+Renderer::Renderer(const HelloImGui::SimpleRunnerParams &simpleParams)
+{
+    RunnerParams fullParams = simpleParams.ToRunnerParams();
+    Priv_SetupRunner(fullParams, false);
+}
+
+Renderer::Renderer(const HelloImGui::VoidFunction &guiFunction, const std::string &windowTitle, bool windowSizeAuto,
+                   bool windowRestorePreviousGeometry, const HelloImGui::ScreenSize &windowSize, float fpsIdle)
+{
+    SimpleRunnerParams params;
+    params.guiFunction = guiFunction;
+    params.windowTitle = windowTitle;
+    params.windowSizeAuto = windowSizeAuto;
+    params.windowRestorePreviousGeometry = windowRestorePreviousGeometry;
+    params.windowSize = windowSize;
+    params.fpsIdle = fpsIdle;
+    RunnerParams fullParams = params.ToRunnerParams();
+    Priv_SetupRunner(fullParams, false);
+}
+
+void Renderer::Render()
+{
+    IM_ASSERT(gLastRunner != nullptr && "HelloImGui::Renderer::Render() called without a valid runner");
+    gLastRunner->CreateFramesAndRender();
+}
+
+Renderer::~Renderer()
+{
+    Priv_TearDown();
+}
+
+// =========================== HelloImGui::Run ==================================
+
+void Run(RunnerParams& runnerParams)
+{
+    Priv_SetupRunner(runnerParams, true);
     gLastRunner->Run();
-    gLastRunnerParams = nullptr;
+    Priv_TearDown();
 }
 
 void Run(const SimpleRunnerParams& simpleRunnerParams)
@@ -88,18 +180,21 @@ void Run(
     Run(params);
 }
 
+
+// ============================== Utility functions ===============================
+
 RunnerParams* GetRunnerParams()
 {
-    if (gLastRunnerParams == nullptr)
+    auto ptr = Priv_CurrentRunnerParamsPtr();
+    if (ptr == nullptr)
         throw std::runtime_error("HelloImGui::GetRunnerParams() would return null. Did you call HelloImGui::Run()?");
-    return gLastRunnerParams;
+    return ptr;
 }
 
 bool IsUsingHelloImGui()
 {
-    return gLastRunnerParams != nullptr;
+    return Priv_CurrentRunnerParamsPtr() != nullptr;
 }
-
 
 void SwitchLayout(const std::string& layoutName)
 {
@@ -108,7 +203,7 @@ void SwitchLayout(const std::string& layoutName)
 
 std::string CurrentLayoutName()
 {
-    return gLastRunnerParams->dockingParams.layoutName;
+    return GetRunnerParams()->dockingParams.layoutName;
 }
 
 
