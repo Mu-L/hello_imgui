@@ -75,8 +75,17 @@ static RunnerParams* Priv_CurrentRunnerParamsPtr()
 // ---------------------------------------------------
 static int gRendererInstanceCount = 0;
 
-static void Priv_SetupRunner(RunnerParams &passedUserParams, bool isUserPointer)
+enum class SetupMode
 {
+    Renderer,
+    Run
+};
+
+static void Priv_SetupRunner(RunnerParams &passedUserParams, SetupMode setupMode)
+{
+    bool isUserPointer = (setupMode == SetupMode::Run);  // When using HelloImGui::Run, we may modify the user's runnerParams
+    bool shallSetupTearDown = (setupMode == SetupMode::Renderer);  // When using HelloImGui::Renderer, we shall call Setup/TearDown()
+
     if (gRendererInstanceCount > 0)
         throw std::runtime_error("Only one instance of `HelloImGui::Renderer` can exist at a time.");
     if (!isUserPointer)
@@ -94,14 +103,16 @@ static void Priv_SetupRunner(RunnerParams &passedUserParams, bool isUserPointer)
         fprintf(stderr, "HelloImGui::Renderer() failed to factor a runner!\n %s", gMissingBackendErrorMessage.c_str());
         IM_ASSERT(false && "HelloImGui::Renderer() failed to factor a runner!");
     }
-    gLastRunner->Setup();
+    if (shallSetupTearDown)
+        gLastRunner->Setup();
     gRendererInstanceCount++;
 }
 
-static void Priv_TearDown()
+static void Priv_TearDown(SetupMode setupMode)
 {
     IM_ASSERT(gLastRunner != nullptr && "HelloImGui::Renderer::~Renderer() called without a valid runner");
-    if (!gLastRunner->WasTearedDown())
+    bool shallSetupTearDown = (setupMode == SetupMode::Renderer);  // When using HelloImGui::Renderer, we shall call Setup/TearDown()
+    if (shallSetupTearDown)
         gLastRunner->TearDown(false);
     gLastRunner = nullptr;
     gRendererInstanceCount = 0;
@@ -112,13 +123,13 @@ static void Priv_TearDown()
 Renderer::Renderer(const HelloImGui::RunnerParams &runnerParams)
 {
     HelloImGui::RunnerParams runnerParamsCopy = runnerParams;
-    Priv_SetupRunner(runnerParamsCopy, false);
+    Priv_SetupRunner(runnerParamsCopy, SetupMode::Renderer);
 }
 
 Renderer::Renderer(const HelloImGui::SimpleRunnerParams &simpleParams)
 {
     RunnerParams fullParams = simpleParams.ToRunnerParams();
-    Priv_SetupRunner(fullParams, false);
+    Priv_SetupRunner(fullParams, SetupMode::Renderer);
 }
 
 Renderer::Renderer(const HelloImGui::VoidFunction &guiFunction, const std::string &windowTitle, bool windowSizeAuto,
@@ -132,7 +143,7 @@ Renderer::Renderer(const HelloImGui::VoidFunction &guiFunction, const std::strin
     params.windowSize = windowSize;
     params.fpsIdle = fpsIdle;
     RunnerParams fullParams = params.ToRunnerParams();
-    Priv_SetupRunner(fullParams, false);
+    Priv_SetupRunner(fullParams, SetupMode::Renderer);
 }
 
 void Renderer::Render()
@@ -143,16 +154,16 @@ void Renderer::Render()
 
 Renderer::~Renderer()
 {
-    Priv_TearDown();
+    Priv_TearDown(SetupMode::Renderer);
 }
 
 // =========================== HelloImGui::Run ==================================
 
 void Run(RunnerParams& runnerParams)
 {
-    Priv_SetupRunner(runnerParams, true);
+    Priv_SetupRunner(runnerParams, SetupMode::Run);
     gLastRunner->Run();
-    Priv_TearDown();
+    Priv_TearDown(SetupMode::Run);
 }
 
 void Run(const SimpleRunnerParams& simpleRunnerParams)
