@@ -1311,8 +1311,9 @@ void AbstractRunner::CreateFramesAndRender(bool insideReentrantCall)
     // Inside these blocks, it is strictly forbidden to call any user callback
     // (since they might run Python code on the main thread)
     //
-    //    // For more details, see
-    //    //     external/imgui_test_engine/imgui_test_engine/imgui_test_engine/imgui_te_python_gil.jpg
+    //    // For more details, see (in imgui_bundle)
+    //    //     external/imgui_test_engine/imgui_test_engine/imgui_test_engine/imgui_te_python_gil.md
+    //    //     external/imgui_test_engine/imgui_test_engine/imgui_test_engine/imgui_te_python_gil.jpg (original sketch)
     //
     // Also, two ImGui methods handle the test engine and its coroutine + thread switches:
     //  => They should not be in a block SCOPED_RELEASE_GIL_ON_MAIN_THREAD
